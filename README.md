@@ -1,12 +1,12 @@
-# LUNA16
-You can do the download of dataset by [Academic Torrents](http://academictorrents.com/collection/luna-lung-nodule-analysis-16---isbi-2016-challenge)
+# LUNA16 Challenge Dataset
+You can do the download of dataset at [Academic Torrents](http://academictorrents.com/collection/luna-lung-nodule-analysis-16---isbi-2016-challenge)
 
 ## Instructions
 
 - Clone this repo and move the [**LUNA16**](https://luna16.grand-challenge.org/) dataset to that directory, that seames like that:
 
 ```
-\--LUNA16-Image-Extractor\
+\--LUNA16-Image-Extractor
  |
  |--/CSVFILES
  |--/subset0
@@ -20,8 +20,8 @@ You can do the download of dataset by [Academic Torrents](http://academictorrent
  |--requirements.txt
 ```
 
-> **WARNING**
->Maybe occur with you some trouble with the dataset depacking, to run around that:
+> **WARNING**:
+>Maybe happen with you some trouble with the dataset unpacking, to run around that:
 >```bash
 >zip -FFv subset_some_number.zip --out fixed_compressed_file.zip
 >```
