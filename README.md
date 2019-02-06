@@ -20,13 +20,13 @@ You can do the download of dataset at [Academic Torrents](http://academictorrent
  |--requirements.txt
 ```
 
-> **WARNING**:
->Maybe happen with you some trouble with the dataset unpacking, to run around that:
->```bash
->zip -FFv subset_some_number.zip --out fixed_compressed_file.zip
->```
->and then:
->```bash
->unzip fixed_compressed_file.zip
->```
+ **WARNING**:
+Maybe happen with you some trouble with the dataset unpacking, to run around that:
+```bash
+zip -FFv subset_some_number.zip --out fixed_compressed_file.zip
+```
+and then:
+```bash
+unzip fixed_compressed_file.zip
+```
 
