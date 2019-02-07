@@ -48,7 +48,12 @@ def normalize_planes(image):
     return image
 
 
-def save_scan(patch, output_path, patient_id, z_coord):
-    Image.fromarray(patch * 255).convert("L").save(
-        os.path.join(output_path, f"image_{z_coord}_{patient_id}.tiff")
-    )
+def save_scan(image, output_path, patient_id, z_coord, file_format="tiff"):
+    image_name = f"image_{z_coord}_{patient_id}.{file_format}"
+
+    if file_format != "npy":
+        Image.fromarray(image * 255).convert("L").save(
+            os.path.join(output_path, image_name)
+        )
+    else:
+        np.save("image_name", image * 255)

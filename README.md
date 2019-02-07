@@ -10,9 +10,7 @@ Clone this repo and move the [**LUNA16**](https://luna16.grand-challenge.org/) d
  |--/CSVFILES
  |--/subset0
  |--/subset1
- .
- .
- .
+ |- ...
  |--README.md
  |--Pipfile
  |--Pipfile.lock
