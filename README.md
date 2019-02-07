@@ -30,3 +30,12 @@ and then:
 unzip fixed_compressed_file.zip
 ```
 
+
+- If you are using **pipev**:
+```bash
+pipenv install
+```
+if isn't:
+```bash
+pip install -r requirements.txt
+```

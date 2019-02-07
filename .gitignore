@@ -1,2 +1,6 @@
 subset*
 CSVFILES
+images*
+*.zip
+.vscode
+.ipynb*
