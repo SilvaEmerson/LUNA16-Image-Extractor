@@ -1,9 +1,8 @@
 # LUNA16 Challenge Dataset
-You can do the download of dataset at [Academic Torrents](http://academictorrents.com/collection/luna-lung-nodule-analysis-16---isbi-2016-challenge)
 
 ## Instructions
 
-- Clone this repo and move the [**LUNA16**](https://luna16.grand-challenge.org/) dataset to that directory, that seames like that:
+Clone this repo and move the [**LUNA16**](https://luna16.grand-challenge.org/) dataset to such directory, will look like that:
 
 ```
 \--LUNA16-Image-Extractor
@@ -31,7 +30,7 @@ unzip fixed_compressed_file.zip
 ```
 
 
-- If you are using **pipev**:
+If you are using **pipev**:
 ```bash
 pipenv install
 ```
