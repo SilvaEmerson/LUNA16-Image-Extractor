@@ -1,19 +1,30 @@
 import csv
 import os
+import yaml
+from typing import List
+
 import numpy as np
 import SimpleITK as sitk
 from PIL import Image
-import matplotlib.pyplot as plt
+
+
+def get_env_config(yaml_config_file: str) -> List[str]:
+    """Receives a .yaml config file
+    Returns the config variables in the file
+    """
+    with open(yaml_config_file, "r") as file:
+        file_content = yaml.load(file)
+    return file_content
 
 
 def load_itk_image(filename):
     itkimage = sitk.ReadImage(filename)
-    numpyImage = sitk.GetArrayFromImage(itkimage)
+    image_arr = sitk.GetArrayFromImage(itkimage)
 
     numpy_origin = np.array(list(reversed(itkimage.GetOrigin())))
     numpy_spacing = np.array(list(reversed(itkimage.GetSpacing())))
 
-    return numpyImage, numpy_origin, numpy_spacing
+    return image_arr, numpy_origin, numpy_spacing
 
 
 def read_csv(filename, cand_id):

@@ -11,6 +11,10 @@ numpy = "*"
 jupyter = "*"
 matplotlib = "*"
 pillow = "*"
+pyyaml = "*"
+
+[scripts]
+start = "python main.py"
 
 [requires]
 python_version = "3.7"

@@ -1,0 +1,4 @@
+OUTPUT_PATH:
+  "./images0"
+CAND_PATH:
+  "./CSVFILES/candidates.csv"
