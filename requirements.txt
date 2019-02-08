@@ -35,6 +35,7 @@ ptyprocess==0.6.0 ; os_name != 'nt'
 pygments==2.3.1
 pyparsing==2.3.1
 python-dateutil==2.8.0
+pyyaml==3.13
 pyzmq==17.1.2
 qtconsole==4.4.3
 send2trash==1.5.0
