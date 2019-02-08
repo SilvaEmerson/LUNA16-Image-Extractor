@@ -2,5 +2,7 @@ INPUT_PATH:
   "./subset0"
 OUTPUT_PATH:
   "./images0"
+BIN_OUTPUT_PATH:
+  "./images0_bin"
 CAND_PATH:
   "./CSVFILES/candidates.csv"

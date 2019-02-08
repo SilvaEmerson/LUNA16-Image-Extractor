@@ -32,10 +32,10 @@ def read_csv(filename, cand_id):
         return [line for line in csv.reader(file) if line[0] == cand_id]
 
 
-def world_to_voxel_coord(world_coord, origin, spacing):
-    stretchedVoxelCoord = np.absolute(world_coord - origin)
-    voxelCoord = stretchedVoxelCoord / spacing
-    return voxelCoord
+def world_to_voxel_coord(origin, spacing, world_coord):
+    stretched_voxel_coord = np.absolute(world_coord - origin)
+    voxel_coord = stretched_voxel_coord / spacing
+    return voxel_coord
 
 
 def normalize_planes(image):
@@ -48,7 +48,7 @@ def normalize_planes(image):
     return image
 
 
-def save_scan(image, output_path, patient_id, z_coord, file_format="tiff"):
+def save_scan(image, patient_id, z_coord, output_path, file_format="tiff"):
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
     if file_format != "npy":
@@ -56,4 +56,6 @@ def save_scan(image, output_path, patient_id, z_coord, file_format="tiff"):
             os.path.join(output_path, image_name)
         )
     else:
-        np.save("image_name", image * 255)
+        np.save(os.path.join(output_path, image_name), image * 255)
+
+    print(f'{image_name} saved!')
