@@ -1,6 +1,5 @@
 import os
 import re
-import argparse
 from itertools import islice
 from operator import attrgetter
 from functools import partial
@@ -31,46 +30,20 @@ def main(cand_path, output_path, bin_output_path):
             image = utils.normalize_planes(image_arr[z_coord])
 
             # generalizing save_scan to any output path
-            save_scan = partial(utils.save_scan, image, patient_id, z_coord)
-            save_scan(output_path)
-            save_scan(bin_output_path, file_format='npy')
+            save_scan_to = partial(utils.save_scan, image, patient_id, z_coord)
+            save_scan_to(output_path)
+            save_scan_to(bin_output_path, file_format='npy')
 
     return _
 
 
 if __name__ == "__main__":
-    # Adding --config and --limit command line parameter
-    parser = argparse.ArgumentParser()
-    required = parser.add_argument_group("required arguments")
-
-    required.add_argument(
-        "--config",
-        metavar="*.yaml",
-        type=str,
-        required=True,
-        help="The relative path for .yaml config file",
-    )
-
-    required.add_argument(
-        "--limit",
-        metavar="N",
-        type=int,
-        required=True,
-        help="The limit of files to be run",
-    )
-
-    params = vars(parser.parse_args())
-
-    limit = params.get("limit")
-    config_file = params.get("config")
-
-    config = utils.get_env_config(config_file)
+    limit, config = utils.get_running_params()
 
     INPUT_PATH = config.get("INPUT_PATH")
     OUTPUT_PATH = config.get("OUTPUT_PATH")
     CAND_PATH = config.get("CAND_PATH")
     BIN_OUTPUT_PATH = config.get("BIN_OUTPUT_PATH")
-
 
     # scandir returns a iterator of os.DirEntry
     with os.scandir(INPUT_PATH) as subset:

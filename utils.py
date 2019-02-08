@@ -1,14 +1,15 @@
 import csv
 import os
-import yaml
+import argparse
 from typing import List
 
+import yaml
 import numpy as np
 import SimpleITK as sitk
 from PIL import Image
 
 
-def get_env_config(yaml_config_file: str) -> List[str]:
+def get_file_configs(yaml_config_file: str) -> List[str]:
     """Receives a .yaml config file
     Returns the config variables in the file
     """
@@ -48,7 +49,7 @@ def normalize_planes(image):
     return image
 
 
-def save_scan(image, patient_id, z_coord, output_path, file_format="tiff"):
+async def save_scan(image, patient_id, z_coord, output_path, file_format="tiff"):
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
     if file_format != "npy":
@@ -59,3 +60,31 @@ def save_scan(image, patient_id, z_coord, output_path, file_format="tiff"):
         np.save(os.path.join(output_path, image_name), image * 255)
 
     print(f'{image_name} saved!')
+
+def get_running_params():
+    # Adding --config and --limit command line parameter
+    parser = argparse.ArgumentParser()
+    required = parser.add_argument_group("required arguments")
+
+    required.add_argument(
+        "--config",
+        metavar="*.yaml",
+        type=str,
+        required=True,
+        help="The relative path for .yaml config file",
+    )
+
+    required.add_argument(
+        "--limit",
+        metavar="N",
+        type=int,
+        required=True,
+        help="The limit of files to be run",
+    )
+
+    params = vars(parser.parse_args())
+
+    limit = params.get("limit")
+    config_file = params.get("config")
+
+    return limit, get_file_configs(config_file)
