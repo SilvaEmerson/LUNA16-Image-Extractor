@@ -5,6 +5,7 @@ from operator import attrgetter
 from functools import partial
 
 import numpy as np
+from rx import Observable
 
 import utils
 
@@ -47,7 +48,9 @@ if __name__ == "__main__":
 
     # scandir returns a iterator of os.DirEntry
     with os.scandir(INPUT_PATH) as subset:
-        mhd_files = filter(lambda filename: filename.name.endswith(".mhd"), subset)
-        mhd_filenames = islice(map(attrgetter('path'), mhd_files), limit)
-        [*map(main(CAND_PATH, OUTPUT_PATH, BIN_OUTPUT_PATH), mhd_filenames)]
-        print("Sucess")
+        Observable.from_(subset) \
+            .filter(lambda file: file.name.endswith(".mhd")) \
+            .take(limit) \
+            .pluck_attr('path') \
+            .map(main(CAND_PATH, OUTPUT_PATH, BIN_OUTPUT_PATH)) \
+            .subscribe(lambda : print("Finished!"))

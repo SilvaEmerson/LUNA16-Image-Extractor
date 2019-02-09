@@ -49,7 +49,7 @@ def normalize_planes(image):
     return image
 
 
-async def save_scan(image, patient_id, z_coord, output_path, file_format="tiff"):
+def save_scan(image, patient_id, z_coord, output_path, file_format="tiff"):
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
     if file_format != "npy":
@@ -60,6 +60,7 @@ async def save_scan(image, patient_id, z_coord, output_path, file_format="tiff")
         np.save(os.path.join(output_path, image_name), image * 255)
 
     print(f'{image_name} saved!')
+
 
 def get_running_params():
     # Adding --config and --limit command line parameter
