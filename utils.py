@@ -52,7 +52,9 @@ def normalize_planes(image):
     return image
 
 
-def save_scan(image, patient_id, z_coord, output_path, file_format="tiff"):
+def save_scan(
+    patient_id, image=None, z_coord=None, output_path=None, file_format="tiff"
+):
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
     if file_format != "npy":
