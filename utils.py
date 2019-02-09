@@ -6,6 +6,7 @@ from typing import List
 import yaml
 import numpy as np
 import SimpleITK as sitk
+from rx import Observable
 from PIL import Image
 
 
@@ -30,7 +31,9 @@ def load_itk_image(filename):
 
 def read_csv(filename, cand_id):
     with open(filename, "r") as file:
-        return [line for line in csv.reader(file) if line[0] == cand_id]
+        return Observable.from_(
+            [line for line in csv.reader(file) if line[0] == cand_id]
+        )
 
 
 def world_to_voxel_coord(origin, spacing, world_coord):
@@ -59,7 +62,7 @@ def save_scan(image, patient_id, z_coord, output_path, file_format="tiff"):
     else:
         np.save(os.path.join(output_path, image_name), image * 255)
 
-    print(f'{image_name} saved!')
+    print(f"{image_name} saved!")
 
 
 def get_running_params():

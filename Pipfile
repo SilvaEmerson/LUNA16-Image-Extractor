@@ -12,6 +12,7 @@ jupyter = "*"
 matplotlib = "*"
 pillow = "*"
 pyyaml = "*"
+rx = "*"
 
 [scripts]
 start = "python main.py"
