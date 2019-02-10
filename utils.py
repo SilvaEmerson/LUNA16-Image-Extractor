@@ -1,7 +1,7 @@
 import csv
 import os
 import argparse
-from typing import List
+from typing import List, Tuple, Dict
 
 import yaml
 import numpy as np
@@ -19,7 +19,7 @@ def get_file_configs(yaml_config_file: str) -> List[str]:
     return file_content
 
 
-def load_itk_image(filename):
+def load_itk_image(filename: str) -> Tuple["NpArray", "NpArray", "NpArray"]:
     itkimage = sitk.ReadImage(filename)
     image_arr = sitk.GetArrayFromImage(itkimage)
 
@@ -29,20 +29,22 @@ def load_itk_image(filename):
     return image_arr, numpy_origin, numpy_spacing
 
 
-def read_csv(filename, cand_id):
+def read_csv(filename: str, cand_id: str) -> Observable[List[List[int]]]:
     with open(filename, "r") as file:
         return Observable.from_(
             [line for line in csv.reader(file) if line[0] == cand_id]
         )
 
 
-def world_to_voxel_coord(origin, spacing, world_coord):
+def world_to_voxel_coord(
+    origin: "NpArray", spacing: "NpArray", world_coord: "NpArray"
+) -> "NpArray":
     stretched_voxel_coord = np.absolute(world_coord - origin)
     voxel_coord = stretched_voxel_coord / spacing
     return voxel_coord
 
 
-def normalize_planes(image):
+def normalize_planes(image: "NpArray") -> "NpArray":
     max_HU = 400.0
     min_HU = -1000.0
 
@@ -53,8 +55,12 @@ def normalize_planes(image):
 
 
 def save_scan(
-    patient_id, image=None, z_coord=None, output_path=None, file_format="tiff"
-):
+    patient_id: str,
+    image: "NpArray" = None,
+    z_coord: int = None,
+    output_path: str = None,
+    file_format: str = "tiff",
+) -> None:
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
     if file_format != "npy":
@@ -67,7 +73,7 @@ def save_scan(
     print(f"{image_name} saved!")
 
 
-def get_running_params():
+def get_running_params() -> Tuple[int, Dict[str, str]]:
     # Adding --config and --limit command line parameter
     parser = argparse.ArgumentParser()
     required = parser.add_argument_group("required arguments")

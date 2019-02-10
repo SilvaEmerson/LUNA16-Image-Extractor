@@ -1,6 +1,7 @@
 import os
 import re
 from functools import partial
+from typing import Callable
 
 import numpy as np
 from rx import Observable
@@ -8,8 +9,8 @@ from rx import Observable
 import utils
 
 
-def main(cand_path, output_path, bin_output_path):
-    def _(img_path):
+def main(cand_path: str, output_path: str, bin_output_path: str) -> Callable[str, str]:
+    def _(img_path: str) -> str:
         image_arr, origin, spacing = utils.load_itk_image(img_path)
 
         get_voxel_coord = partial(utils.world_to_voxel_coord, origin, spacing)
@@ -38,9 +39,9 @@ def main(cand_path, output_path, bin_output_path):
             image, lambda z_coord, image: {"image": image, "z_coord": z_coord}
         ).map(lambda data: partial(utils.save_scan, patient_id, **data))
 
-        save_image.tap(lambda fn: fn(output_path=output_path))\
-            .tap(lambda fn: fn(output_path=bin_output_path, file_format="npy"))\
-            .subscribe()
+        save_image.tap(lambda fn: fn(output_path=output_path)).tap(
+            lambda fn: fn(output_path=bin_output_path, file_format="npy")
+        ).subscribe()
 
         return "Finished!"
 
@@ -59,7 +60,7 @@ if __name__ == "__main__":
     with os.scandir(INPUT_PATH) as subset:
         Observable.from_(subset).filter(lambda file: file.name.endswith(".mhd")).take(
             limit
-        # pluck_attr get the path attribute of each emitted object
+            # pluck_attr get the path attribute of each emitted object
         ).pluck_attr("path").map(
             main(CAND_PATH, OUTPUT_PATH, BIN_OUTPUT_PATH)
         ).subscribe(
