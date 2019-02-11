@@ -9,8 +9,10 @@ from rx import Observable
 import utils
 
 
-def main(cand_path: str, output_path: str, bin_output_path: str) -> Callable[str, str]:
-    def _(img_path: str) -> str:
+def main(
+    cand_path: str, output_path: str, bin_output_path: str
+) -> Callable[[str], None]:
+    def _(img_path: str) -> None:
         image_arr, origin, spacing = utils.load_itk_image(img_path)
 
         get_voxel_coord = partial(utils.world_to_voxel_coord, origin, spacing)
@@ -41,9 +43,9 @@ def main(cand_path: str, output_path: str, bin_output_path: str) -> Callable[str
 
         save_image.tap(lambda fn: fn(output_path=output_path)).tap(
             lambda fn: fn(output_path=bin_output_path, file_format="npy")
-        ).subscribe()
-
-        return "Finished!"
+        ).subscribe(
+            on_completed=lambda: print("Finished!"), on_error=lambda err: print(err)
+        )
 
     return _
 
@@ -64,5 +66,5 @@ if __name__ == "__main__":
         ).pluck_attr("path").map(
             main(CAND_PATH, OUTPUT_PATH, BIN_OUTPUT_PATH)
         ).subscribe(
-            lambda msg: print(msg)
+            on_error=lambda err: print(err)
         )

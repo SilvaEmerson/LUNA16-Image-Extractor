@@ -29,7 +29,7 @@ def load_itk_image(filename: str) -> Tuple["NpArray", "NpArray", "NpArray"]:
     return image_arr, numpy_origin, numpy_spacing
 
 
-def read_csv(filename: str, cand_id: str) -> Observable[List[List[int]]]:
+def read_csv(filename: str, cand_id: str) -> Observable:
     with open(filename, "r") as file:
         return Observable.from_(
             [line for line in csv.reader(file) if line[0] == cand_id]
