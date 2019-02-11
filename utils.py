@@ -70,7 +70,7 @@ def save_scan(
 ) -> None:
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
-    if os.path.isfile(image_name):
+    if not os.path.isfile(image_name):
         if file_format != "npy":
             Image.fromarray(image * 255).convert("L").save(
                 os.path.join(output_path, image_name)
@@ -79,7 +79,6 @@ def save_scan(
             np.save(os.path.join(output_path, image_name), image * 255)
 
         print(f"{image_name} saved!")
-    print(f"{image_name} already exist!")
 
 
 def get_running_params() -> Tuple[int, Dict[str, str]]:
