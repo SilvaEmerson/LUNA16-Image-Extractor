@@ -21,7 +21,7 @@ def main(
         patient_id = re.findall("^.*\/(.*).mhd$", img_path)[0]
 
         # get candidates of the pacient
-        cands = utils.read_csv(cand_path, patient_id)
+        io_inst, cands = utils.read_csv(cand_path, patient_id)
 
         z_coord = (
             cands.map(
@@ -44,7 +44,7 @@ def main(
         save_image.tap(lambda fn: fn(output_path=output_path)).tap(
             lambda fn: fn(output_path=bin_output_path, file_format="npy")
         ).subscribe(
-            on_completed=lambda: print("Finished!"), on_error=lambda err: print(err)
+            on_completed=lambda: io_inst.close(), on_error=lambda err: print(err)
         )
 
     return _

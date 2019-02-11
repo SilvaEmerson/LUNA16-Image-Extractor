@@ -11,8 +11,14 @@ from PIL import Image
 
 
 def get_file_configs(yaml_config_file: str) -> List[str]:
-    """Receives a .yaml config file
-    Returns the config variables in the file
+    """Read a `.yaml` config file and returns such configs variables
+    Parameters
+    ----------
+    yaml_config_file : A `.yaml` config file
+
+    Returns
+    -------
+    The config variables in the file
     """
     with open(yaml_config_file, "r") as file:
         file_content = yaml.load(file)
@@ -29,11 +35,12 @@ def load_itk_image(filename: str) -> Tuple["NpArray", "NpArray", "NpArray"]:
     return image_arr, numpy_origin, numpy_spacing
 
 
-def read_csv(filename: str, cand_id: str) -> Observable:
-    with open(filename, "r") as file:
-        return Observable.from_(
-            [line for line in csv.reader(file) if line[0] == cand_id]
-        )
+def read_csv(filename: str, cand_id: str) -> Tuple["IOFile", Observable]:
+    file = open(filename, "r")
+    return (
+        file,
+        Observable.from_(csv.reader(file)).filter(lambda line: line[0] == cand_id),
+    )
 
 
 def world_to_voxel_coord(
@@ -63,14 +70,16 @@ def save_scan(
 ) -> None:
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
-    if file_format != "npy":
-        Image.fromarray(image * 255).convert("L").save(
-            os.path.join(output_path, image_name)
-        )
-    else:
-        np.save(os.path.join(output_path, image_name), image * 255)
+    if os.path.isfile(image_name):
+        if file_format != "npy":
+            Image.fromarray(image * 255).convert("L").save(
+                os.path.join(output_path, image_name)
+            )
+        else:
+            np.save(os.path.join(output_path, image_name), image * 255)
 
-    print(f"{image_name} saved!")
+        print(f"{image_name} saved!")
+    print(f"{image_name} already exist!")
 
 
 def get_running_params() -> Tuple[int, Dict[str, str]]:
