@@ -70,7 +70,7 @@ def save_scan(
 ) -> None:
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
-    if not os.path.isfile(image_name):
+    if not os.path.isfile(os.path.join(output_path, image_name)):
         if file_format != "npy":
             Image.fromarray(image * 255).convert("L").save(
                 os.path.join(output_path, image_name)
