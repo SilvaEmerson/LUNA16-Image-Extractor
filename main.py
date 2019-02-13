@@ -12,7 +12,7 @@ import utils
 def main(
     cand_path: str, output_path: str, bin_output_path: str
 ) -> Callable[[str], None]:
-    def _(img_path: str) -> None:
+    def _main(img_mainpath: str) -> Observable:
         image_arr, origin, spacing = utils.load_itk_image(img_path)
 
         get_voxel_coord = partial(utils.world_to_voxel_coord, origin, spacing)
@@ -31,18 +31,19 @@ def main(
         if not os.path.isdir(bin_patient_dir):
             os.mkdir(bin_patient_dir)
 
-        Observable.from_(image_arr).map(utils.normalize_planes).zip(
-            Observable.range(0, slices_num),
-            lambda image, ind: {"image": image, "z_coord": ind},
-        ).map(lambda data: partial(utils.save_scan, patient_id, **data)).tap(
-            lambda fn: fn(output_path=patient_dir)
-        ).tap(
-            lambda fn: fn(output_path=bin_patient_dir, file_format="npy")
-        ).subscribe(
-            on_completed=lambda: print("Finished!"), on_error=lambda err: print(err)
+        return (
+            Observable.from_(image_arr)
+            .map(utils.normalize_planes)
+            .zip(
+                Observable.range(0, slices_num),
+                lambda image, ind: {"image": image, "z_coord": ind},
+            )
+            .map(lambda data: partial(utils.save_scan, patient_id, **data))
+            .tap(lambda save_at: save_at(output_path=patient_dir))
+            .tap(lambda save_at: save_at(output_path=bin_patient_dir, file_format="npy"))
         )
 
-    return _
+    return _main
 
 
 if __name__ == "__main__":
@@ -53,13 +54,21 @@ if __name__ == "__main__":
     CAND_PATH = config.get("CAND_PATH")
     BIN_OUTPUT_PATH = config.get("BIN_OUTPUT_PATH")
 
+    # use is_done observable to stop main Observable
+    is_done = Observable.just("")
+
     # scandir returns a iterator of os.DirEntry
     with os.scandir(INPUT_PATH) as subset:
-        Observable.from_(subset).filter(lambda file: file.name.endswith(".mhd")).take(
+        Observable.from_(subset).take_until(is_done).filter(
+            lambda file: file.name.endswith(".mhd")
+        ).take(
             limit
-            # pluck_attr get the path attribute of each emitted object
-        ).pluck_attr("path").map(
+        # pluck_attr get the path attribute of each emitted object
+        ).pluck_attr(
+            "path"
+        ).flat_map(
             main(CAND_PATH, OUTPUT_PATH, BIN_OUTPUT_PATH)
         ).subscribe(
-            on_error=lambda err: print(err)
+            on_error=lambda err: print(err),
+            on_completed=lambda: is_done.subscribe().dispose(),
         )
