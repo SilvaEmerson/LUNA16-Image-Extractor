@@ -12,7 +12,7 @@ import utils
 def main(
     cand_path: str, output_path: str, bin_output_path: str
 ) -> Callable[[str], None]:
-    def _main(img_mainpath: str) -> Observable:
+    def _main(img_path: str) -> Observable:
         image_arr, origin, spacing = utils.load_itk_image(img_path)
 
         get_voxel_coord = partial(utils.world_to_voxel_coord, origin, spacing)
