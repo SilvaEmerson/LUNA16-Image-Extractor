@@ -56,12 +56,10 @@ if __name__ == "__main__":
     CAND_PATH = config.get("CAND_PATH")
     BIN_OUTPUT_PATH = config.get("BIN_OUTPUT_PATH")
 
-    # use is_done observable to stop main Observable
-    is_done = Observable.just("")
 
     # scandir returns a iterator of os.DirEntry
     with os.scandir(INPUT_PATH) as subset:
-        Observable.from_(subset).take_until(is_done).filter(
+        sub = Observable.from_(subset).filter(
             lambda file: file.name.endswith(".mhd")
         ).take(
             limit
@@ -72,5 +70,6 @@ if __name__ == "__main__":
             main(CAND_PATH, OUTPUT_PATH, BIN_OUTPUT_PATH)
         ).subscribe(
             on_error=lambda err: print(err),
-            on_completed=lambda: is_done.subscribe().dispose(),
         )
+
+        sub.dispose()
