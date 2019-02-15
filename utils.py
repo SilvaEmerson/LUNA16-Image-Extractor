@@ -68,6 +68,16 @@ def save_scan(
     output_path: str = None,
     file_format: str = "tiff",
 ) -> None:
+    """Receive a patient id and save on disk a image of a slice at a z coord 
+    Parameters
+    ----------
+    patient_id : A `.yaml` config file
+    image: Numpy array
+    z_coord: the slice z coord
+    output_path: file path to save the image
+    file_format: output file format
+    """
+
     image_name = f"image_{z_coord}_{patient_id}.{file_format}"
 
     if not os.path.isfile(os.path.join(output_path, image_name)):

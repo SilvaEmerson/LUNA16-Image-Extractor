@@ -40,7 +40,9 @@ def main(
             )
             .map(lambda data: partial(utils.save_scan, patient_id, **data))
             .tap(lambda save_at: save_at(output_path=patient_dir))
-            .tap(lambda save_at: save_at(output_path=bin_patient_dir, file_format="npy"))
+            .tap(
+                lambda save_at: save_at(output_path=bin_patient_dir, file_format="npy")
+            )
         )
 
     return _main
@@ -63,7 +65,7 @@ if __name__ == "__main__":
             lambda file: file.name.endswith(".mhd")
         ).take(
             limit
-        # pluck_attr get the path attribute of each emitted object
+            # pluck_attr get the path attribute of each emitted object
         ).pluck_attr(
             "path"
         ).flat_map(
