@@ -23,6 +23,8 @@ def main(
         # capture the pacient id by regexp
         patient_id = re.findall("^.*\/(.*).mhd$", img_path)[0]
 
+        candidates_regions = utils.read_csv(cand_path, patient_id)
+
         patient_dir = os.path.join(output_path, patient_id)
         bin_patient_dir = os.path.join(bin_output_path, patient_id)
 

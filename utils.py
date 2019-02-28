@@ -8,6 +8,49 @@ import numpy as np
 import SimpleITK as sitk
 from rx import Observable
 from PIL import Image
+import keras as K
+
+
+KerasModel = K.engine.training.Model
+
+
+def split_image(image, n_dim_x, n_dim_y):
+    """receive images and split
+    n_dim_x = number of slices in vertical axis
+    n_dim_y = number of slices in vertical axis
+    """
+    new_arr = []
+    try:
+        arr = np.array_split(image, n_dim_y, axis=1)
+        [
+            [new_arr.append(nest_piece) for nest_piece in np.array_split(piece, n_dim_x)]
+            for piece in arr
+        ]
+    except Exception as e:
+        print(e)
+    return new_arr
+
+
+def load_model(model_path: str, weights_path: str) -> KerasModel:
+    """Receives a model and model weigths file path
+    Returns a Keras model object
+    """
+    with open(model_path, "r") as model:
+        model_config = model.read()
+
+    model = K.models.model_from_json(model_config)
+    model.load_weights(weights_path)
+    return model
+
+
+def predict_parenchyme(model: KerasModel, image: NpArr) -> NpArr:
+    """Receives a Keras model object instance and a image batch
+    Returns a bacth of predictions
+    """
+    if len(image.shape) <= 4:
+        image = image.reshape((1, *IMAGE_DIM, 1))
+    print('Predicted')
+    return model.predict(image)
 
 
 def get_file_configs(yaml_config_file: str) -> List[str]:
@@ -35,12 +78,11 @@ def load_itk_image(filename: str) -> Tuple["NpArray", "NpArray", "NpArray"]:
     return image_arr, numpy_origin, numpy_spacing
 
 
-def read_csv(filename: str, cand_id: str) -> Tuple["IOFile", Observable]:
+def read_csv(filename: str, cand_id: str) -> Observable:
     file = open(filename, "r")
-    return (
-        file,
-        Observable.from_(csv.reader(file)).filter(lambda line: line[0] == cand_id),
-    )
+    return  Observable.from_(csv.reader(file))\
+            .filter(lambda line: line[0] == cand_id)
+            .finally_action(lambda : file.close())
 
 
 def world_to_voxel_coord(
@@ -49,6 +91,16 @@ def world_to_voxel_coord(
     stretched_voxel_coord = np.absolute(world_coord - origin)
     voxel_coord = stretched_voxel_coord / spacing
     return voxel_coord
+
+
+def gen_world_coord(cand):
+    return np.asarray([float(cand[3]), float(cand[2]), float(cand[1])])
+
+
+def world_to_voxel_coord(world_coord, origin, spacing):
+     
+    stretched_voxel_coord = np.absolute(world_coord - origin)
+    return stretched_voxel_coord // spacing
 
 
 def normalize_planes(image: "NpArray") -> "NpArray":
