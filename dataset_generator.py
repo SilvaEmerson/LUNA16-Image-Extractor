@@ -42,7 +42,7 @@ def main(
                     {},
                 )
             )
-            .tap(lambda el: print(f"Saved slice {*[*el.keys()])}"))
+            .tap(lambda el: print(f"Saved slice {[*el.keys()][0]}"))
             .flat_map(
                 lambda el: slices.element_at([*el.keys()][0]).map(
                     lambda image: {
