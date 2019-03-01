@@ -23,30 +23,35 @@ def main(
         # capture the pacient id by regexp
         patient_id = re.findall("^.*\/(.*).mhd$", img_path)[0]
 
-        candidates_regions = utils.read_csv(cand_path, patient_id)
-
-        patient_dir = os.path.join(output_path, patient_id)
-        bin_patient_dir = os.path.join(bin_output_path, patient_id)
-
-        if not os.path.isdir(patient_dir):
-            os.mkdir(patient_dir)
-        if not os.path.isdir(bin_patient_dir):
-            os.mkdir(bin_patient_dir)
+        candidates_regions = (
+            utils.read_csv(cand_path, patient_id)
+            .map(utils.gen_world_coord)
+            .map(get_voxel_coord)
+        )
+        slices = Observable.from_(image_arr).map(utils.normalize_planes)
 
         return (
-            Observable.from_(image_arr)
-            .map(utils.normalize_planes)
-            .zip(
-                Observable.range(0, slices_num),
-                lambda image, ind: {"image": image, "z_coord": ind},
-            )
-            .map(lambda data: partial(utils.save_scan, patient_id, **data))
-            .tap(lambda save_at: save_at(output_path=patient_dir))
-            .tap(
-                lambda save_at: save_at(
-                    output_path=bin_patient_dir, file_format="npy"
+            candidates_regions.group_by(lambda el: el[0])
+            .flat_map(
+                lambda obs: obs.reduce(
+                    lambda acc, curr: {
+                        curr[0]: [*acc.get(curr[0], []), curr[1:]]
+                    },
+                    {},
                 )
             )
+            .tap(lambda el: print(*[*el.keys()]))
+            .flat_map(
+                lambda el: slices.element_at([*el.keys()][0]).map(
+                    lambda image: {
+                        "coords": el[[*el.keys()][0]],
+                        "image": (image * 255).astype("uint8"),
+                    }
+                )
+            )
+            .to_list()
+            .tap(lambda lst: print("Saving"))
+            .tap(lambda lst: np.save(f"./{patient_id}.npy", np.array(lst)))
         )
 
     return _main
@@ -71,7 +76,7 @@ if __name__ == "__main__":
             )
             .pluck_attr("path")
             .flat_map(main(CAND_PATH, OUTPUT_PATH, BIN_OUTPUT_PATH))
-            .subscribe(on_error=lambda err: print(err))
+            .subscribe()
         )
 
         sub.dispose()

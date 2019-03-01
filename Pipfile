@@ -8,12 +8,12 @@ verify_ssl = true
 [packages]
 simpleitk = "*"
 numpy = "*"
-matplotlib = "*"
 pillow = "*"
 pyyaml = "*"
 rx = "*"
 tensorflow = "*"
 jupyter = "*"
+matplotlib = "*"
 
 [scripts]
 start = "python main.py"

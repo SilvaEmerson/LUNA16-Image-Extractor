@@ -57,11 +57,14 @@ def main(OUTPUT_IMAGE, OUTPUT_MASK, PATH_IMAGE=None, PATH_MASK=None):
 
     obs_images = Observable.from_(os.listdir(PATH_IMAGE))
 
-    obs_masks_repeated = obs_images.count().flat_map(lambda el: obs_mask.repeat(el))
+    obs_masks_repeated = obs_images.count().flat_map(
+        lambda el: obs_mask.repeat(el)
+    )
 
     return (
         obs_images.zip(
-            obs_masks_repeated, lambda file, mask: {"file": file, "masks": mask}
+            obs_masks_repeated,
+            lambda file, mask: {"file": file, "masks": mask},
         )
         .filter(lambda data: is_in_masks(**data))
         .map(itemgetter("file"))
@@ -77,6 +80,8 @@ if __name__ == "__main__":
                 "PATH_MASK": os.path.join(MASKS_ORIGIN, direc.name),
                 "PATH_IMAGE": os.path.join(IMAGES_ORIGIN, direc.name),
             }
-        ).flat_map(lambda data: main(OUTPUT_IMAGE, OUTPUT_MASK, **data)).subscribe(
+        ).flat_map(
+            lambda data: main(OUTPUT_IMAGE, OUTPUT_MASK, **data)
+        ).subscribe(
             print
         )

@@ -1,6 +1,7 @@
 import csv
 import os
 import argparse
+import json
 from typing import List, Tuple, Dict
 
 import yaml
@@ -8,10 +9,16 @@ import numpy as np
 import SimpleITK as sitk
 from rx import Observable
 from PIL import Image
-import keras as K
+
+# import keras as K
 
 
-KerasModel = K.engine.training.Model
+# KerasModel = K.engine.training.Model
+
+
+def persist_json(images):
+    with open("./images.json", "w+") as file:
+        json.dump(images, file)
 
 
 def split_image(image, n_dim_x, n_dim_y):
@@ -23,34 +30,15 @@ def split_image(image, n_dim_x, n_dim_y):
     try:
         arr = np.array_split(image, n_dim_y, axis=1)
         [
-            [new_arr.append(nest_piece) for nest_piece in np.array_split(piece, n_dim_x)]
+            [
+                new_arr.append(nest_piece)
+                for nest_piece in np.array_split(piece, n_dim_x)
+            ]
             for piece in arr
         ]
     except Exception as e:
         print(e)
     return new_arr
-
-
-def load_model(model_path: str, weights_path: str) -> KerasModel:
-    """Receives a model and model weigths file path
-    Returns a Keras model object
-    """
-    with open(model_path, "r") as model:
-        model_config = model.read()
-
-    model = K.models.model_from_json(model_config)
-    model.load_weights(weights_path)
-    return model
-
-
-def predict_parenchyme(model: KerasModel, image: NpArr) -> NpArr:
-    """Receives a Keras model object instance and a image batch
-    Returns a bacth of predictions
-    """
-    if len(image.shape) <= 4:
-        image = image.reshape((1, *IMAGE_DIM, 1))
-    print('Predicted')
-    return model.predict(image)
 
 
 def get_file_configs(yaml_config_file: str) -> List[str]:
@@ -80,27 +68,30 @@ def load_itk_image(filename: str) -> Tuple["NpArray", "NpArray", "NpArray"]:
 
 def read_csv(filename: str, cand_id: str) -> Observable:
     file = open(filename, "r")
-    return  Observable.from_(csv.reader(file))\
-            .filter(lambda line: line[0] == cand_id)
-            .finally_action(lambda : file.close())
+    return (
+        Observable.from_(csv.reader(file))
+        .filter(lambda line: line[0] == cand_id)
+        .finally_action(lambda: file.close())
+    )
 
 
 def world_to_voxel_coord(
     origin: "NpArray", spacing: "NpArray", world_coord: "NpArray"
 ) -> "NpArray":
+    is_nodule = world_coord[-1]
+    world_coord = world_coord[:-1]
     stretched_voxel_coord = np.absolute(world_coord - origin)
-    voxel_coord = stretched_voxel_coord / spacing
-    return voxel_coord
+    voxel_coord = stretched_voxel_coord // spacing
+    return np.append(voxel_coord, is_nodule)
 
 
 def gen_world_coord(cand):
-    return np.asarray([float(cand[3]), float(cand[2]), float(cand[1])])
-
-
-def world_to_voxel_coord(world_coord, origin, spacing):
-     
-    stretched_voxel_coord = np.absolute(world_coord - origin)
-    return stretched_voxel_coord // spacing
+    """
+    Returns the candidate global coord
+    """
+    return np.asarray(
+        [float(cand[3]), float(cand[2]), float(cand[1]), float(cand[-1])]
+    )
 
 
 def normalize_planes(image: "NpArray") -> "NpArray":
