@@ -10,16 +10,6 @@ import SimpleITK as sitk
 from rx import Observable
 from PIL import Image
 
-# import keras as K
-
-
-# KerasModel = K.engine.training.Model
-
-
-def persist_json(images):
-    with open("./images.json", "w+") as file:
-        json.dump(images, file)
-
 
 def split_image(image, n_dim_x, n_dim_y):
     """receive images and split

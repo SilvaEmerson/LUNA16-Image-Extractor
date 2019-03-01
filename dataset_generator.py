@@ -31,8 +31,10 @@ def main(
         slices = Observable.from_(image_arr).map(utils.normalize_planes)
 
         return (
+            # group candidates by z coord
             candidates_regions.group_by(lambda el: el[0])
             .flat_map(
+            # build dictionaire with z coord as key and x,y coords and class as values
                 lambda obs: obs.reduce(
                     lambda acc, curr: {
                         curr[0]: [*acc.get(curr[0], []), curr[1:]]
@@ -40,7 +42,7 @@ def main(
                     {},
                 )
             )
-            .tap(lambda el: print(*[*el.keys()]))
+            .tap(lambda el: print(f"Saved slice {*[*el.keys()])}"))
             .flat_map(
                 lambda el: slices.element_at([*el.keys()][0]).map(
                     lambda image: {
@@ -51,7 +53,7 @@ def main(
             )
             .to_list()
             .tap(lambda lst: print("Saving"))
-            .tap(lambda lst: np.save(f"./{patient_id}.npy", np.array(lst)))
+            .tap(lambda lst: np.save(f"./{output_path}/{patient_id}.npy", np.array(lst)))
         )
 
     return _main
