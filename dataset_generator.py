@@ -32,7 +32,7 @@ def main(
 
         candidates_regions = (
             nodules.count().flat_map(lambda nodules_count: no_nodules.take(nodules_count))
-            .join(nodules)
+            .concat(nodules)
             .map(utils.gen_world_coord)
             .map(get_voxel_coord)
         )
