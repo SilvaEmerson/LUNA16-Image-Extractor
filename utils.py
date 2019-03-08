@@ -56,13 +56,11 @@ def load_itk_image(filename: str) -> Tuple["NpArray", "NpArray", "NpArray"]:
     return image_arr, numpy_origin, numpy_spacing
 
 
-def read_csv(filename: str, cand_id: str) -> Observable:
-    file = open(filename, "r")
-    return (
-        Observable.from_(csv.reader(file))
-        .filter(lambda line: line[0] == cand_id)
-        .finally_action(lambda: file.close())
-    )
+def read_csv(filename: str) -> Observable:
+    with open(filename, "r") as file:
+        content = list(file)
+ 
+    return Observable.from_(content)
 
 
 def world_to_voxel_coord(

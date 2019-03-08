@@ -1,16 +1,19 @@
 import os
 import re
+import asyncio
+import multiprocessing
 from functools import partial
 from typing import Callable
 
 import numpy as np
 from rx import Observable
+from rx.concurrency import AsyncIOScheduler
 
 import utils
 
 
 def main(
-    cand_path: str, output_path: str, bin_output_path: str
+    candidates: Observable, output_path: str, bin_output_path: str
 ) -> Callable[[str], None]:
     def _main(img_path: str) -> Observable:
         image_arr, origin, spacing = utils.load_itk_image(img_path)
@@ -24,12 +27,13 @@ def main(
         patient_id = re.findall("^.*\/(.*).mhd$", img_path)[0]
 
         candidates_regions = (
-            utils.read_csv(cand_path, patient_id)
+            candidates.filter(lambda line: line[0] == patient_id)
             .map(utils.gen_world_coord)
             .map(get_voxel_coord)
         )
         slices = Observable.from_(image_arr).map(utils.normalize_planes)
-
+        
+        print(f"Processing exam {patient_id}")
         return (
             # group candidates by z coord
             candidates_regions.group_by(lambda el: el[0])
@@ -52,7 +56,6 @@ def main(
                 )
             )
             .to_list()
-            .tap(lambda lst: print("Saving"))
             .tap(lambda lst: np.save(f"./{output_path}/{patient_id}.npy", np.array(lst)))
         )
 
@@ -67,18 +70,25 @@ if __name__ == "__main__":
     CAND_PATH = config.get("CAND_PATH")
     BIN_OUTPUT_PATH = config.get("BIN_OUTPUT_PATH")
 
+    loop = asyncio.get_event_loop()
+    scheduler = AsyncIOScheduler(loop)
+    candidates = utils.read_csv(CAND_PATH)
+
     # scandir returns a iterator of os.DirEntry
     with os.scandir(INPUT_PATH) as subset:
         sub = (
-            Observable.from_(subset)
+            Observable.from_(subset, scheduler=scheduler)
             .filter(lambda file: file.name.endswith(".mhd"))
             .take(
                 limit
                 # pluck_attr get the path attribute of each emitted object
             )
+            .buffer_with_count(2)
+            .flat_map(lambda el, ind: Observable.from_(el).delay(1e4 * ind))
             .pluck_attr("path")
-            .flat_map(main(CAND_PATH, OUTPUT_PATH, BIN_OUTPUT_PATH))
-            .subscribe()
+            .flat_map(main(candidates, OUTPUT_PATH, BIN_OUTPUT_PATH))
+            .subscribe(on_completed=lambda: loop.call_soon_threadsafe(loop.stop))
         )
 
+        loop.run_forever()
         sub.dispose()
