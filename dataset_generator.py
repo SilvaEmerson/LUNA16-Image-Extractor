@@ -26,11 +26,17 @@ def main(
         # capture the pacient id by regexp
         patient_id = re.findall("^.*\/(.*).mhd$", img_path)[0]
 
+        candidates_regions = candidates.filter(lambda line: line[0] == patient_id)
+        no_nodules = candidates_regions.filter(lambda line: line[-1] == '0')
+        nodules = candidates_regions.filter(lambda line: line[-1] == '1')
+
         candidates_regions = (
-            candidates.filter(lambda line: line[0] == patient_id)
+            nodules.count().flat_map(lambda nodules_count: no_nodules.take(nodules_count))
+            .join(nodules)
             .map(utils.gen_world_coord)
             .map(get_voxel_coord)
         )
+
         slices = Observable.from_(image_arr).map(utils.normalize_planes)
         
         print(f"Processing exam {patient_id}")
@@ -56,7 +62,7 @@ def main(
                 )
             )
             .to_list()
-            .tap(lambda lst: np.save(f"./{output_path}/{patient_id}.npy", np.array(lst)))
+            .tap(lambda lst: np.save(f"./{output_path}/{patient_id}.npy", np.array(lst) if lst != [] else None))
         )
 
     return _main
