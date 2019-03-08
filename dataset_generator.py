@@ -62,7 +62,7 @@ def main(
                 )
             )
             .to_list()
-            .tap(lambda lst: np.save(f"./{output_path}/{patient_id}.npy", np.array(lst) if lst != [] else None))
+            .tap(lambda lst: np.save(f"./{output_path}/{patient_id}.npy", np.array(lst)) if lst != [] else None)
         )
 
     return _main
