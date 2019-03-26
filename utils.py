@@ -2,13 +2,17 @@ import csv
 import os
 import argparse
 import json
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Any
 
 import yaml
 import numpy as np
 import SimpleITK as sitk
 from rx import Observable
 from PIL import Image
+
+
+def set_environ(key: str, val: Any) -> None:
+    os.environ[key] = val
 
 
 def split_image(image, n_dim_x, n_dim_y):

@@ -1,3 +1,6 @@
+"""
+This script create a directory tree for images and original ones
+"""
 import os
 import re
 from shutil import copy
